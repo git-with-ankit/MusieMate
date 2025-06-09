@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Provider {
+  Google
+  Credentials
+}
+
+model User{
+  id              String    @unique @default(uuid())
+  email           String    @unique
+  name            String?
+  password        String?
+  provider        Provider
+  displayName     String?   
+  currentRoomId   String?
+  currentRoomrel  Room?      @relation("currentRoom",fields: [currentRoomId],references: [id])
+  room            Room[]     @relation("creator")
+  chatsrel        Chats[]     @relation("sentByrel")
+  streamPlayed    Streams[]   @relation("playedByrel")
+}
+
+
+model Room {
+  id             String     @unique @default(uuid())
+  name           String 
+  creatorId      String    
+  creator        User      @relation(fields: [creatorId] , references: [id], name :"creator")
+  createdOn      DateTime  @default(now())
+  joinedUsersrel User[]    @relation("currentRoom")
+  chatsrel       Chats[]   @relation("roomIdrel")
+  streamsRel     Streams[] @relation("roomIdrel")
+}
+
+model Chats{
+  id             String     @unique  @default(uuid())
+  roomId         String
+  roomIdrel      Room       @relation("roomIdrel",fields: [roomId],references: [id])
+  message       String
+  sentOn        DateTime    @default(now())
+  sentBy        String
+  sentByrel     User        @relation("sentByrel",fields: [sentBy],references: [id])
+}
+
+model Streams {
+  id           String       @unique  @default(uuid())
+  roomId       String
+  roomIdRel    Room         @relation("roomIdrel",fields: [roomId],references: [id])
+  playedBy     String
+  playedByRel  User         @relation("playedByrel",fields: [playedBy],references: [id])
+  url          String
+  extractedId  String?
+  bigImg       String?
+  title        String?
+  playing      Boolean      @default(true)
+}
