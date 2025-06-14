@@ -1,5 +1,6 @@
 "use client"
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
+import { participantsContext } from "@/app/room/page";
 
 interface Message {
     content: string;
@@ -8,6 +9,8 @@ interface Message {
 }
 
 export default function Chat(props: { roomId: string, displayName: string }) {
+    const context = useContext(participantsContext);
+    const getParticipants = context?.getParticipants;
     const [messages, setMessages] = useState<Message[]>([{
         content: "You have entered the chat application",
         sender: "System",
@@ -53,11 +56,16 @@ export default function Chat(props: { roomId: string, displayName: string }) {
         ws.onmessage = (e) => {
             console.log("Message received:", e.data);
             const parsedMessage = JSON.parse(e.data);
-            setMessages(m => [...m, {
-                content: parsedMessage.content,
-                sender: parsedMessage.sender,
-                isOwn: false
-            }]);
+            console.log("Parsed message received by ws client : ",parsedMessage)
+            if(parsedMessage.sender){
+                setMessages(m => [...m, {
+                    content: parsedMessage.content,
+                    sender: parsedMessage.sender,
+                    isOwn: false
+                }]);
+            } else if(parsedMessage.type === "Someone left" || parsedMessage.type === "Someone joined") {
+                getParticipants?.();
+            }
         };
         
         wsRef.current = ws;
@@ -99,7 +107,7 @@ export default function Chat(props: { roomId: string, displayName: string }) {
     };
 
     return (
-        <div className='min-h-screen flex flex-col bg-neutral-950'>
+        <div className='h-screen flex flex-col bg-neutral-950'>
             <div className='flex-1 overflow-y-auto p-4 space-y-4'>
                 {messages.map((message, index) => (
                     <div key={`${message.content}-${index}`} 

@@ -7,9 +7,9 @@ import { useRouter } from "next/navigation";
 export default function Appbar() {
     const session = useSession();
     const router = useRouter()
-    const handleSignOut = async ()=>{
+    const handleSignOut = async () => {
+        await fetch("/api/clearRoomUser");
         signOut({callbackUrl:"/"});
-        router.push("/");
     }
     return (
         <div className="flex justify-between px-5 py-5">

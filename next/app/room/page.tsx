@@ -5,6 +5,7 @@ import { BackgroundBeams } from "@/components/ui/background-beams";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import { createContext } from "react";
 
 interface Participant {
     id: string;
@@ -12,6 +13,11 @@ interface Participant {
     displayName: string | null;
     email: string;
 }
+interface contextType {
+    getParticipants: () => void;
+}
+
+export const participantsContext = createContext<contextType | null>(null); 
 
 export default function Main() {
     const searchParams = useSearchParams();
@@ -60,10 +66,22 @@ export default function Main() {
     }
 
     useEffect(()=>{
-        getMyDetails();
-    },[])
+    
 
-    useEffect(() => {
+        getMyDetails();
+        getParticipants();
+
+        return ()=>{
+            console.log("component unmounted")
+            clearUser();
+        }
+    },[]);
+
+    async function clearUser(){
+        await fetch("/api/clearRoomUser"); 
+    }
+
+    {/*useEffect(() => {
         if (!roomId) {
             console.error("No roomId provided");
             return;
@@ -72,7 +90,7 @@ export default function Main() {
         // Set up polling to refresh participants list every 5 seconds
         const interval = setInterval(getParticipants, 10000);
         return () => clearInterval(interval);
-    }, [roomId]);
+    }, [roomId]);  */}
 
     if (!roomId) {
         return <div>No room ID provided</div>;
@@ -89,10 +107,13 @@ export default function Main() {
                             <h2 className="text-xl text-white font-semibold">Welcome to {roomDetails.name}</h2>
                         </div>
                     )}
-                    <Chat 
+                    <participantsContext.Provider value={{getParticipants }}>
+                        <Chat 
                         roomId={roomId} 
                         displayName={displayName}
                     />
+                    </participantsContext.Provider>
+                    
                 </div>
                 <div className="text-white p-4 border border-gray-800 rounded-lg">
                     <h3 className="text-lg font-semibold mb-4">Room-Mates</h3>

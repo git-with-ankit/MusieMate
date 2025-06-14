@@ -42,6 +42,11 @@ wss.on("connection", function(socket: WebSocket) {
                 roomId: parsedMessage.payload.roomId,
                 displayName: parsedMessage.payload.displayName
             });
+            for(let i=0;i< allSockets.length ; i++){
+                if(allSockets[i].roomId === parsedMessage.payload.roomId && allSockets[i].socket !== socket){
+                    allSockets[i].socket.send(JSON.stringify({type : "Someone joined"}))
+                }
+            }
         }   
 
         if(parsedMessage.type === "chat") {
@@ -64,6 +69,21 @@ wss.on("connection", function(socket: WebSocket) {
     });
 
     socket.addEventListener("close", () => {
+        let roomId;
+        for(let i=0;i<allSockets.length;i++){
+            if(allSockets[i].socket === socket){
+                roomId = allSockets[i].roomId;
+            }
+        }
         allSockets = allSockets.filter(x => x.socket !== socket);
+        if(roomId){
+            for(let i=0;i< allSockets.length ; i++){
+                if(allSockets[i].roomId === roomId ){
+                    allSockets[i].socket.send(JSON.stringify({type : "Someone left"}))
+                }
+            }
+        }
+        
+        
     });
 });
