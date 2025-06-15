@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { createContext } from "react";
+import SongsSection from "@/components/SongsSection";
 
 interface Participant {
     id: string;
@@ -81,16 +82,7 @@ export default function Main() {
         await fetch("/api/clearRoomUser"); 
     }
 
-    {/*useEffect(() => {
-        if (!roomId) {
-            console.error("No roomId provided");
-            return;
-        }
-        getParticipants();
-        // Set up polling to refresh participants list every 5 seconds
-        const interval = setInterval(getParticipants, 10000);
-        return () => clearInterval(interval);
-    }, [roomId]);  */}
+    
 
     if (!roomId) {
         return <div>No room ID provided</div>;
@@ -100,7 +92,7 @@ export default function Main() {
         <div className="min-h-screen w-full bg-neutral-950 antialiased">
             <Appbar />
             <div className="grid grid-cols-4 gap-3 p-4">
-                <div className="text-white">Songs section</div>
+                <SongsSection></SongsSection>
                 <div className="col-span-2 border border-gray-800 rounded-lg overflow-hidden">
                     {roomDetails && (
                         <div className="flex justify-center items-center p-4 border-b border-gray-800">
