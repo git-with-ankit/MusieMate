@@ -66,6 +66,23 @@ wss.on("connection", function(socket: WebSocket) {
                 }
             }
         }
+
+        if(parsedMessage.type === "play_song") {
+            console.log("Play song message received: ", parsedMessage);
+            const currentUser = allSockets.find((x) => x.socket === socket);
+            if(currentUser) {
+                const messageToSend = JSON.stringify({
+                    type: "play_song",
+                    payload: parsedMessage.payload
+                });
+                
+                for(let i = 0; i < allSockets.length; i++) {
+                    if(allSockets[i].roomId === currentUser.roomId && allSockets[i].socket !== socket) {
+                        allSockets[i].socket.send(messageToSend);
+                    }
+                }
+            }
+        }
     });
 
     socket.addEventListener("close", () => {

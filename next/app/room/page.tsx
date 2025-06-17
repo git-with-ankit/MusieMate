@@ -67,8 +67,6 @@ export default function Main() {
     }
 
     useEffect(()=>{
-    
-
         getMyDetails();
         getParticipants();
 

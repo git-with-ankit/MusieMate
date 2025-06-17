@@ -55,14 +55,14 @@ model Chats{
 }
 
 model Streams {
-  id           String       @unique  @default(uuid())
-  roomId       String
-  roomIdRel    Room         @relation("roomIdrel",fields: [roomId],references: [id])
-  playedBy     String
-  playedByRel  User         @relation("playedByrel",fields: [playedBy],references: [id])
-  url          String
-  extractedId  String?
-  bigImg       String?
-  title        String?
-  playing      Boolean      @default(true)
+  id              String       @unique  @default(uuid())
+  roomId          String
+  roomIdRel       Room         @relation("roomIdrel",fields: [roomId],references: [id])
+  playedBy        String
+  playedByRel     User         @relation("playedByrel",fields: [playedBy],references: [id])
+  url             String
+  extractedId     String?
+  bigImg          String?
+  title           String?
+  playing         Boolean      @default(true)
 }
