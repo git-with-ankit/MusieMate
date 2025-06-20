@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prismaClient } from '@/lib/db';
 
-
-export async function GET(req: NextRequest, { params }: { params: { roomId: string } }) {
-    const { roomId } = params;
+export async function GET(req: NextRequest, { params }: { params: Promise<{ roomId: string }> }) {
+    const { roomId } = await params;
     try {
         const messages = await prismaClient.chats.findMany({
             where: { roomId },

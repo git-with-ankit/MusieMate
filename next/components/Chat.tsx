@@ -1,6 +1,6 @@
 "use client"
 import { useContext, useEffect, useRef, useState } from "react";
-import { participantsContext } from "@/app/room/page";
+import { participantsContext } from "@/app/room/participantsContext";
 import { useSession } from "next-auth/react";
 
 interface Message {

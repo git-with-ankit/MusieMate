@@ -3,11 +3,12 @@ import Appbar from "@/components/Appbar";
 import Chat from "@/components/Chat";
 import { BackgroundBeams } from "@/components/ui/background-beams";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { createContext } from "react";
 import SongsSection from "@/components/SongsSection";
 import { Button } from "@/components/ui/button";
+import { participantsContext } from "./participantsContext";
 
 interface Participant {
     id: string;
@@ -19,16 +20,13 @@ interface contextType {
     getParticipants: () => void;
 }
 
-export const participantsContext = createContext<contextType | null>(null); 
-
-export default function Main() {
+function RoomPageContent() {
     const searchParams = useSearchParams();
     const roomId = searchParams.get('roomId');
     const session = useSession();
     const [participants, setParticipants] = useState<Participant[]>([]);
     const [roomDetails, setRoomDetails] = useState<{ name: string } | null>(null);
     const [displayName,setDisplayName] = useState("");
-    
 
     async function getMyDetails() {
         try{
@@ -86,17 +84,19 @@ export default function Main() {
         alert("Room Id copied to clipboard!")
     }
 
-    
-
     if (!roomId) {
         return <div>No room ID provided</div>;
     }
 
     return (
         <div className="min-h-screen w-full bg-neutral-950 antialiased">
-            <Appbar />
+            <Suspense fallback={null}>
+                <Appbar />
+            </Suspense>
             <div className="grid grid-cols-4 gap-3 p-4">
-                <SongsSection displayName = {displayName}></SongsSection>
+                <Suspense fallback={null}>
+                    <SongsSection displayName={displayName}></SongsSection>
+                </Suspense>
                 <div className="col-span-2 border border-gray-800 rounded-lg overflow-hidden">
                     {roomDetails && (
                         <div className="flex justify-center items-center p-4 border-b border-gray-800">
@@ -131,5 +131,13 @@ export default function Main() {
             </div>
             <BackgroundBeams />
         </div>
+    );
+}
+
+export default function Main() {
+    return (
+        <Suspense fallback={null}>
+            <RoomPageContent />
+        </Suspense>
     );
 }

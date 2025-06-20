@@ -1,6 +1,6 @@
 import { prismaClient } from "@/lib/db"
 import { getServerSession } from "next-auth"
-import { authOptions } from "../auth/[...nextauth]/route"
+import { authOptions } from "../auth/[...nextauth]/authOptions"
 import { NextResponse } from "next/server";
 
  async function GET(){

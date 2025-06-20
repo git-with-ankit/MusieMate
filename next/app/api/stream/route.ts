@@ -1,9 +1,9 @@
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import {z} from "zod";
-import { authOptions } from "../auth/[...nextauth]/route";
-//@ts-ignore
-import youtubesearchapi from "youtube-search-api";
+import { authOptions } from "../auth/[...nextauth]/authOptions"
+//@ts-ignore//eslint-disable-next-line
+// const youtubesearchapi = require("youtube-search-api");
 import { YT_REGEX } from "@/lib/util";
 import { prismaClient } from "@/lib/db";
 
@@ -15,6 +15,8 @@ const createStreamSchema = z.object({
 
 export async function POST(req:NextRequest) {
     try{
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const youtubesearchapi = require("youtube-search-api");
         const session = await getServerSession(authOptions);
         if(!session?.user.id){
             return NextResponse.json({

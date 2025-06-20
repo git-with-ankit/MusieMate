@@ -3,10 +3,10 @@ import { NextResponse } from "next/server";
 
 export async function GET(
     request: Request,
-    { params }: { params: { roomId: string } }
+    { params }: { params: Promise<{ roomId: string }> }
 ) {
     try {
-        const roomId = await params.roomId
+        const { roomId } = await params;
         const room = await prismaClient.room.findFirst({
             where: {
                 id: roomId
