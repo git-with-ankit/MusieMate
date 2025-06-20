@@ -1,6 +1,7 @@
 "use client"
 import { useContext, useEffect, useRef, useState } from "react";
 import { participantsContext } from "@/app/room/page";
+import { useSession } from "next-auth/react";
 
 interface Message {
     content: string;
@@ -9,6 +10,7 @@ interface Message {
 }
 
 export default function Chat(props: { roomId: string, displayName: string }) {
+    const { data: session } = useSession();
     const context = useContext(participantsContext);
     const getParticipants = context?.getParticipants;
     const [messages, setMessages] = useState<Message[]>([{
@@ -79,6 +81,33 @@ export default function Chat(props: { roomId: string, displayName: string }) {
         }
     }, [props.roomId, props.displayName]);
 
+    useEffect(() => {
+        // Fetch messages from API on mount
+        async function fetchMessages() {
+            try {
+                const res = await fetch(`/api/messages/${props.roomId}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setMessages([
+                        {
+                            content: "You have entered the chat application",
+                            sender: "System",
+                            isOwn: false
+                        },
+                        ...data.map((msg: any) => ({
+                            content: msg.content,
+                            sender: msg.sender, // displayName
+                            isOwn: msg.senderId === session?.user?.id // compare senderId
+                        }))
+                    ]);
+                }
+            } catch (e) {
+                // fallback: do nothing
+            }
+        }
+        fetchMessages();
+    }, [props.roomId, props.displayName, session?.user?.id]);
+
     async function clearRoom(){
         const res = await fetch(`/api/clearRoomUser`);
         if(!res.ok){
@@ -86,10 +115,9 @@ export default function Chat(props: { roomId: string, displayName: string }) {
         }
     }
 
-    const sendMessage = () => {
-       
+    const sendMessage = async () => {
         const message = messageRef.current?.value;
-        if (message) {
+        if (message && session?.user?.id) {
             setMessages(m => [...m,{
                 content : message,
                 sender : props.displayName,
@@ -102,6 +130,20 @@ export default function Chat(props: { roomId: string, displayName: string }) {
                     sender: props.displayName
                 }
             }));
+            // Persist to DB
+            try {
+                await fetch('/api/messages', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        roomId: props.roomId,
+                        content: message,
+                        senderId: session.user.id
+                    })
+                });
+            } catch (e) {
+                // Optionally handle error
+            }
             messageRef.current!.value = "";
         }
     };

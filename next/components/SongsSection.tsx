@@ -21,7 +21,7 @@ interface Video {
 }
 
 
-export default function SongsSection(){
+export default function SongsSection(props:{displayName:string}){
     const session = useSession();
     const searchParams = useSearchParams();
     const roomId = searchParams.get('roomId');
@@ -31,6 +31,7 @@ export default function SongsSection(){
     const wsRef = useRef<WebSocket | null>(null);
     const [url,setUrl] = useState("");
     const [currentVideo , setCurrentVideo] = useState<Video | null>(null);
+    const [playedBy , setPlayedBy] = useState("");
 
     // WebSocket connection for music synchronization
     useEffect(() => {
@@ -45,7 +46,7 @@ export default function SongsSection(){
                 type: "join",
                 payload: {
                     roomId: roomId,
-                    displayName: session.data.user.name || session.data.user.email
+                    displayName: props.displayName
                 }
             }));
         };
@@ -65,6 +66,7 @@ export default function SongsSection(){
             if (parsedMessage.type === "play_song") {
                 console.log("Received play_song message:", parsedMessage.payload);
                 setCurrentVideo(parsedMessage.payload);
+                setPlayedBy(parsedMessage.playedBy);
          
             }
         };
@@ -109,13 +111,15 @@ export default function SongsSection(){
         
         // Set the current video locally
         setCurrentVideo(data.stream);
+        setPlayedBy(props.displayName);
         
         // Send the play_song message to all other users in the room
         if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
             wsRef.current.send(JSON.stringify({
                 type: "play_song",
                 
-                payload: data.stream
+                payload: data.stream,
+                playedBy : props.displayName
             }));
         }
     }
@@ -144,6 +148,7 @@ export default function SongsSection(){
                     <div className='sticky w-full overflow-hidden bg-neutral-950 border-t border-gray-800'>
                         <Playing currentVideo={currentVideo} />
                     </div>
+                    <div className="text-white mt-4 mx-4">Played By - {playedBy}</div>
                 </>
             )}
         </div>

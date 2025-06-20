@@ -2,14 +2,22 @@
 import { signIn, signOut, useSession } from "next-auth/react"
 import { Button } from "./ui/button";
 import { Music } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function Appbar() {
+    const searchParams = useSearchParams();
+    const roomId = searchParams.get('roomId');
+
     const session = useSession();
     const router = useRouter()
     const handleSignOut = async () => {
         await fetch("/api/clearRoomUser");
         signOut({callbackUrl:"/"});
+    }
+   
+    const handleLeaveRoom = async()=>{
+        await fetch("/api/clearRoomUser"); 
+        router.push("/dashboard");
     }
     return (
         <div className="flex justify-between px-5 py-5">
@@ -18,7 +26,8 @@ export default function Appbar() {
                     <Music className="ml-2 text-white"></Music>
                 </div>
             
-                <div>
+                <div className="flex justify-center items-center gap-6">
+                    {roomId && <Button className="cursor-pointer text-white bg-red-800" onClick={handleLeaveRoom}>Leave Room</Button>}
                     <Button className="cursor-pointer text-white bg-slate-800" onClick={handleSignOut}>Sign Out</Button>
               
                  </div>

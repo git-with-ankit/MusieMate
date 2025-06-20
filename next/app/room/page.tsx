@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { createContext } from "react";
 import SongsSection from "@/components/SongsSection";
+import { Button } from "@/components/ui/button";
 
 interface Participant {
     id: string;
@@ -80,6 +81,11 @@ export default function Main() {
         await fetch("/api/clearRoomUser"); 
     }
 
+    async function copyId() {
+        await navigator.clipboard.writeText(roomId!);
+        alert("Room Id copied to clipboard!")
+    }
+
     
 
     if (!roomId) {
@@ -90,7 +96,7 @@ export default function Main() {
         <div className="min-h-screen w-full bg-neutral-950 antialiased">
             <Appbar />
             <div className="grid grid-cols-4 gap-3 p-4">
-                <SongsSection></SongsSection>
+                <SongsSection displayName = {displayName}></SongsSection>
                 <div className="col-span-2 border border-gray-800 rounded-lg overflow-hidden">
                     {roomDetails && (
                         <div className="flex justify-center items-center p-4 border-b border-gray-800">
@@ -106,7 +112,7 @@ export default function Main() {
                     
                 </div>
                 <div className="text-white p-4 border border-gray-800 rounded-lg">
-                    <h3 className="text-lg font-semibold mb-4">Room-Mates</h3>
+                    <h3 className="text-lg font-semibold mb-4 text-center">Room-Mates</h3>
                     <div className="space-y-2">
                         {participants.map((participant) => (
                             <div 
@@ -120,6 +126,7 @@ export default function Main() {
                             </div>
                         ))}
                     </div>
+                    <div className="flex justify-center"><Button className="my-4 bg-purple-600 mx-auto cursor-pointer" onClick={copyId}>Copy Room Id</Button></div>
                 </div>
             </div>
             <BackgroundBeams />

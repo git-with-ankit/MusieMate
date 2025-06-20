@@ -1,5 +1,5 @@
 import { WebSocketServer, WebSocket } from 'ws';
-import { createClient } from "redis";
+{/*import { createClient } from "redis";
 
 
 const client = createClient();
@@ -14,7 +14,7 @@ async function startRedisServer() {
     }
 }
 
-startRedisServer();
+startRedisServer();*/}
 
 const wss = new WebSocketServer({port:8080},()=>{
     console.log("Ws server started on port 8080")
@@ -73,7 +73,8 @@ wss.on("connection", function(socket: WebSocket) {
             if(currentUser) {
                 const messageToSend = JSON.stringify({
                     type: "play_song",
-                    payload: parsedMessage.payload
+                    payload: parsedMessage.payload,
+                    playedBy : parsedMessage.playedBy
                 });
                 
                 for(let i = 0; i < allSockets.length; i++) {
